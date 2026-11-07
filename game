@@ -1,0 +1,42 @@
+for(var i = 0; i < currentLevelData.length; i++){
+     var row = currentLevelData[i];
+                 
+     for( var j = firstCollisionTile; j <= lastCollisionTile && j < row.length; j++){
+        var tileType = row[j];
+        if (tileType !== 'B' && tileType !== 'S') {
+            continue;
+        }
+        var screenX = j*20-camX+player.x;
+        var screenY = i*20;
+
+        // 1. Check spike death IMMEDIATELY before doing any block handling
+        if(tileType === 'S' && rectRect(player.x, player.y, player.w, player.h, screenX, screenY, 20, 20)) {
+            reset();
+            break; 
+        }
+
+        // 2. Only run solid ground physics if it's a block ('B')
+        if (tileType === 'B') {
+            var horizontalOverlap = player.x+player.w > screenX && player.x < screenX+20;
+            
+            if(!horizontalOverlap){
+                continue;
+            }
+            
+            var previousBottom = player.py+player.h;
+            var currentBottom = player.y+player.h;
+            
+            if(player.yv >= 0 && previousBottom <= screenY && currentBottom >= screenY){
+                player.y = screenY-player.h;
+                player.yv = 0;
+                player.canJump = true;
+                player.rotation = round(player.rotation/90)*90;
+            }
+            
+            if(rectRect(player.x, player.y, player.w, player.h, screenX, screenY, 20, 20)){
+                reset();
+                break;
+            }
+        }
+    }
+}
